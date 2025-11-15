@@ -1,0 +1,1 @@
+ALTER TABLE `income_entries` MODIFY COLUMN `type` enum('Income Add','Income Minus','Income Payment','Money Received','OTP Add','OTP Minus','OTP Payment') NOT NULL;
