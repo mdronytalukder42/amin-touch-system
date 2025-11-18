@@ -1,0 +1,7 @@
+git init
+git add .
+git commit -m "Deploy-ready template for Amin Touch"
+# GitHub repo url ধরো: git@github.com:yourname/amin-touch-deploy.git অথবা https...
+git remote add origin <YOUR_GITHUB_REPO_URL>
+git branch -M main
+git push -u origin main
