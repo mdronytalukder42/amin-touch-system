@@ -1,50 +1,51 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import { users } from "./drizzle/schema.js";
 import mysql from "mysql2/promise";
+import bcrypt from "bcryptjs";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
 if (!DATABASE_URL) {
-  console.error("DATABASE_URL environment variable is not set");
+  console.error("❌ DATABASE_URL environment variable is not set");
   process.exit(1);
 }
 
-async function seedUsers() {
+async function seedDemoUsers() {
   const connection = await mysql.createConnection(DATABASE_URL);
   const db = drizzle(connection);
 
-  console.log("Seeding demo users...");
+  console.log("🌱 Seeding demo users...");
 
   const demoUsers = [
     {
       username: "admin9197",
       password: "Admin9197",
-      name: "AL AMIN",
       role: "admin",
+      name: "AL AMIN",
       email: "admin@amintouch.com",
       loginMethod: "local",
     },
     {
       username: "ronytalukder",
       password: "@jead2016R",
-      name: "RONY TALUKDER",
       role: "user",
+      name: "RONY TALUKDER",
       email: "rony@amintouch.com",
       loginMethod: "local",
     },
     {
       username: "mahir",
       password: "Mahir3",
-      name: "MAHIR",
       role: "user",
+      name: "MAHIR",
       email: "mahir@amintouch.com",
       loginMethod: "local",
     },
     {
       username: "sakiladnan",
       password: "Sakiladnan",
-      name: "SAKIL ADNAN",
       role: "user",
+      name: "SAKIL ADNAN",
       email: "sakil@amintouch.com",
       loginMethod: "local",
     },
@@ -52,22 +53,30 @@ async function seedUsers() {
 
   for (const user of demoUsers) {
     try {
-      await db.insert(users).values(user);
-      console.log(`✓ Created user: ${user.username} (${user.name})`);
-    } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        console.log(`⚠ User ${user.username} already exists, skipping...`);
+      const hashedPassword = await bcrypt.hash(user.password, 10);
+
+      await db.insert(users).values({
+        username: user.username,
+        password: hashedPassword,
+        role: user.role,
+        name: user.name,
+        email: user.email,
+        loginMethod: user.loginMethod,
+      });
+
+      console.log(`✔ Inserted: ${user.username}`);
+    } catch (err) {
+      if (err.code === "ER_DUP_ENTRY") {
+        console.log(`⚠ User already exists: ${user.username}`);
       } else {
-        console.error(`✗ Error creating user ${user.username}:`, error.message);
+        console.error("❌ Error inserting user:", err);
       }
     }
   }
 
-  await connection.end();
-  console.log("\nDemo users seeding completed!");
+  console.log("🎉 Seeding complete.");
+  process.exit(0);
 }
 
-seedUsers().catch((error) => {
-  console.error("Seeding failed:", error);
-  process.exit(1);
-});
+seedDemoUsers();
+
